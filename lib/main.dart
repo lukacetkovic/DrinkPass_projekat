@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
+import 'screens/createNewAcc_screen.dart';
 
 void main() {
   runApp(const DrinkPassApp());
@@ -12,7 +12,7 @@ class DrinkPassApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+      home: CreateNewAccScreen(),
     );
   }
 }
