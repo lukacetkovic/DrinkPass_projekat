@@ -5,233 +5,105 @@ class HomeScreen extends StatelessWidget {
 
   const HomeScreen({
     super.key,
-    this.isLoggedIn = true, // ovde kucamo false ako zelimo da vidimo GUEST view, a sa true je LOGGED IN view
+    this.isLoggedIn = true,
   });
+
+  static const LinearGradient backgroundGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFF2E2A8A),
+      Color(0xFF1A0F3D),
+      Color(0xFF120014),
+      Color(0xFF000000),
+    ],
+  );
+
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [Color(0xFFFF4D6D), Color(0xFFB5179E)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF2B2FAE),
-              Color(0xFF000000),
-            ],
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.only(bottom: 28),
                   child: Column(
                     children: [
-                      const SizedBox(height: 12),
-                      _topBar(),
-                      const SizedBox(height: 16),
-                      _topPickSection(isLoggedIn),
+                      const SizedBox(height: 24),
+                      Image.asset('assets/images/LOGO.png', height: 50),
+                      const SizedBox(height: 26),
+                      _searchBar(),
+
                       const SizedBox(height: 32),
-                      _mostPopularSection(isLoggedIn),
+                      _sectionTitle('TOP PICK'),
+                      const SizedBox(height: 18),
+                      _topPick(isLoggedIn),
+
+                      const SizedBox(height: 40),
+                      _sectionTitle('MOST POPULAR'),
+                      const SizedBox(height: 18),
+                      _popularGrid(isLoggedIn),
+
                       if (isLoggedIn) ...[
-                        const SizedBox(height: 32),
-                        _bestOffersSection(isLoggedIn),
+                        const SizedBox(height: 40),
+                        _sectionTitle('BEST OFFERS'),
+                        const SizedBox(height: 18),
+                        _bestOffersGrid(isLoggedIn),
                       ],
+                      const SizedBox(height: 60),
                     ],
                   ),
                 ),
               ),
-              _bottomNavBar(),
+              _glassBottomNav(),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-Widget _topBar() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
-      children: [
-        const Icon(Icons.search, color: Colors.white),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Container(
-            height: 38,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Pretrazi...',
-                style: TextStyle(
-                  color: Colors.black54,
-                  fontFamily: 'Poppins',
-                ),
-              ),
+  Widget _searchBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withOpacity(0.14)),
+      ),
+      child: Row(
+        children: const [
+          Icon(Icons.search, color: Colors.white70, size: 20),
+          SizedBox(width: 10),
+          Text(
+            'Search clubs, events...',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 13,
+              color: Colors.white54,
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
-Widget _topPickSection(bool isLoggedIn) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        child: Text(
-          'PUPIN BAR - TOP PICK 🔥',
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      const SizedBox(height: 12),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              Image.asset(
-                'assets/images/PUPIN_BAR.png',
-                height: 160,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-              if (isLoggedIn)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.65),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    'JACK DANIELS + COLA x2',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
-Widget _mostPopularSection(bool isLoggedIn) {
-  return _gridSection(
-    title: 'MOST POPULAR',
-    items: [
-      _PopularCard(
-        image: 'assets/images/BAJA_MALI.png',
-        title: 'SPLAV DVA GALEBA',
-        subtitle: 'Baja Mali Knindza',
-        rating: 4.5,
-        offerText: 'GIN & TONIC x2',
-        isLoggedIn: isLoggedIn,
-      ),
-      _PopularCard(
-        image: 'assets/images/ALEKSANDRA.png',
-        title: 'SPLAV CRISTAL',
-        subtitle: 'Aleksandra Prijovic',
-        rating: 5,
-        offerText: 'VODKA + ENERGY',
-        isLoggedIn: isLoggedIn,
-      ),
-      _PopularCard(
-        image: 'assets/images/PERLA.png',
-        title: 'SPLAV PERLA',
-        subtitle: 'El Fuego bend',
-        rating: 4,
-        offerText: 'WHISKEY SOUR',
-        isLoggedIn: isLoggedIn,
-      ),
-      _PopularCard(
-        image: 'assets/images/SHOWROOM.png',
-        title: 'SHOWROOM',
-        subtitle: 'Boban Rajovic',
-        rating: 4.5,
-        offerText: 'MOJITO NIGHT',
-        isLoggedIn: isLoggedIn,
-      ),
-    ],
-  );
-}
-
-Widget _bestOffersSection(bool isLoggedIn) {
-  return _gridSection(
-    title: 'BEST OFFERS',
-    items: [
-      _PopularCard(
-        image: 'assets/images/WERIGE.png',
-        title: 'WERIGE',
-        subtitle: 'Biba',
-        rating: 4,
-        offerText: 'JAMESON + 4 COLA',
-        isLoggedIn: isLoggedIn,
-      ),
-      _PopularCard(
-        image: 'assets/images/PARADISO.png',
-        title: 'PARADISO',
-        subtitle: 'Nucci',
-        rating: 4.5,
-        offerText: 'BELVEDERE + 4 DJUS',
-        isLoggedIn: isLoggedIn,
-      ),
-      _PopularCard(
-        image: 'assets/images/DISKONT.png',
-        title: 'DISKONT BAR',
-        subtitle: 'DJ Party',
-        rating: 4,
-        offerText: 'VODKA NIGHT',
-        isLoggedIn: isLoggedIn,
-      ),
-      _PopularCard(
-        image: 'assets/images/KALEM.png',
-        title: 'KALEM',
-        subtitle: 'Live band',
-        rating: 3.5,
-        offerText: 'APEROL SPRITZ',
-        isLoggedIn: isLoggedIn,
-      ),
-    ],
-  );
-}
-
-Widget _gridSection({
-  required String title,
-  required List<Widget> items,
-}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      child: Align(
+        alignment: Alignment.centerLeft,
         child: Text(
           title,
           style: const TextStyle(
@@ -242,72 +114,147 @@ Widget _gridSection({
           ),
         ),
       ),
-      const SizedBox(height: 16),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 0.72,
-          children: items,
+    );
+  }
+
+  Widget _topPick(bool isLoggedIn) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Stack(
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Image.asset(
+                'assets/images/PUPIN_BAR.png',
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.75),
+                  ],
+                ),
+              ),
+            ),
+            if (isLoggedIn)
+              Positioned(
+                bottom: 18,
+                left: 18,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: primaryGradient,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Text(
+                    'JACK DANIELS + COLA x2 = 50€',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
-    ],
-  );
-}
+    );
+  }
 
-class _PopularCard extends StatelessWidget {
-  final String image;
-  final String title;
-  final String subtitle;
-  final double rating;
-  final String? offerText;
-  final bool isLoggedIn;
+  Widget _popularGrid(bool isLoggedIn) {
+    return _grid([
+      _card('assets/images/BAJA_MALI.png', 'SPLAV DVA GALEBA',
+          'Baja Mali Knindza', 'GIN & TONIC x2 = 70€', isLoggedIn, 4.5),
+      _card('assets/images/ALEKSANDRA.png', 'SPLAV CRISTAL',
+          'Aleksandra Prijovic', 'VODKA + ENERGY = 80€', isLoggedIn, 5),
+      _card('assets/images/PERLA.png', 'SPLAV PERLA', 'El Fuego bend',
+          'WHISKEY SOUR = 40€', isLoggedIn, 4),
+      _card('assets/images/SHOWROOM.png', 'SHOWROOM', 'Boban Rajovic',
+          'MOJITO NIGHT = 10€', isLoggedIn, 4.5),
+    ]);
+  }
 
-  const _PopularCard({
-    required this.image,
-    required this.title,
-    required this.subtitle,
-    required this.rating,
-    required this.isLoggedIn,
-    this.offerText,
-  });
+  Widget _bestOffersGrid(bool isLoggedIn) {
+    return _grid([
+      _card('assets/images/WERIGE.png', 'WERIGE', 'Biba',
+          'WHISKEY + 4 COLA = 40€', isLoggedIn, 4),
+      _card('assets/images/PARADISO.png', 'PARADISO', 'Nucci',
+          'VODKA + 4 JUICE = 70€', isLoggedIn, 4.5),
+      _card('assets/images/DISKONT.png', 'DISKONT BAR', 'DJ Party',
+          'VODKA + 4 JUICE = 60€', isLoggedIn, 4),
+      _card('assets/images/KALEM.png', 'KALEM', 'Live band',
+          'APEROL = 20€', isLoggedIn, 3.5),
+    ]);
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _grid(List<Widget> items) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      child: GridView.count(
+        crossAxisCount: 2,
+        crossAxisSpacing: 18,
+        mainAxisSpacing: 18,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        childAspectRatio: 0.72,
+        children: items,
+      ),
+    );
+  }
+
+  Widget _card(
+    String image,
+    String title,
+    String subtitle,
+    String offer,
+    bool isLoggedIn,
+    double rating,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           child: Stack(
-            alignment: Alignment.bottomCenter,
             children: [
-              Image.asset(
-                image,
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
+              AspectRatio(
+                aspectRatio: 1,
+                child: Image.asset(
+                  image,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
-              if (isLoggedIn && offerText != null)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.65),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    offerText!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
+              if (isLoggedIn)
+                Positioned(
+                  bottom: 10,
+                  left: 10,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      gradient: primaryGradient,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      offer,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -318,18 +265,18 @@ class _PopularCard extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            color: Colors.white,
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w700,
-            fontSize: 12,
+            fontSize: 13,
+            color: Colors.white,
           ),
         ),
         Text(
           subtitle,
           style: const TextStyle(
-            color: Colors.white70,
             fontFamily: 'Poppins',
             fontSize: 11,
+            color: Colors.white70,
           ),
         ),
         if (isLoggedIn) ...[
@@ -350,21 +297,31 @@ class _PopularCard extends StatelessWidget {
       ],
     );
   }
-}
 
-Widget _bottomNavBar() {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 12, top: 8),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        const Icon(Icons.home, color: Colors.orange, size: 28),
-        Image.asset(
-          'assets/images/LOGO.png',
-          height: 46,
-        ),
-        const Icon(Icons.person_outline, color: Colors.white, size: 28),
-      ],
-    ),
-  );
+  Widget _glassBottomNav() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: primaryGradient,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.home, color: Colors.white),
+          ),
+          Image.asset('assets/images/LOGO.png', height: 42),
+          const Icon(Icons.person_outline, color: Colors.white),
+        ],
+      ),
+    );
+  }
 }
