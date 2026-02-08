@@ -5,7 +5,7 @@ class HomeScreen extends StatelessWidget {
 
   const HomeScreen({
     super.key,
-    this.isLoggedIn = true,
+    this.isLoggedIn = false,
   });
 
   static const LinearGradient backgroundGradient = LinearGradient(

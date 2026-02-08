@@ -14,7 +14,12 @@ class ClubDetailsScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF2B2FAE), Color(0xFF000000)],
+            colors: [
+              Color(0xFF2E2A8A),
+              Color(0xFF1A0F3D),
+              Color(0xFF120014),
+              Color(0xFF000000),
+            ],
           ),
         ),
         child: Column(
@@ -42,7 +47,7 @@ class ClubDetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
-            _bottomNavBar(),
+            _glassBottomNav(),
           ],
         ),
       ),
@@ -234,7 +239,7 @@ Widget _tag(String text, IconData icon, {bool highlight = false}) {
           ? [
               BoxShadow(
                 color: const Color(0xFFFF4D6D).withOpacity(0.6),
-                blurRadius: 10,
+                blurRadius: 20,
                 spreadRadius: 0,
                 offset: const Offset(0, 0),
               ),
@@ -281,15 +286,34 @@ Widget _mapSection() {
   );
 }
 
-Widget _bottomNavBar() {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 12, top: 8),
+const LinearGradient primaryGradient = LinearGradient(
+  colors: [Color(0xFFFF4D6D), Color(0xFFB5179E)],
+  begin: Alignment.centerLeft,
+  end: Alignment.centerRight,
+);
+
+Widget _glassBottomNav() {
+  return Container(
+    margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(0.08),
+      borderRadius: BorderRadius.circular(28),
+      border: Border.all(color: Colors.white24),
+    ),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        const Icon(Icons.home, color: Colors.orange, size: 28),
-        Image.asset('assets/images/LOGO.png', height: 46),
-        const Icon(Icons.person_outline, color: Colors.white, size: 28),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: primaryGradient,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Icon(Icons.home, color: Colors.white),
+        ),
+        Image.asset('assets/images/LOGO.png', height: 42),
+        const Icon(Icons.person_outline, color: Colors.white),
       ],
     ),
   );
@@ -307,7 +331,12 @@ void _showConfirmReservationDialog(BuildContext context) {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF1F2A6D), Color(0xFF0E1028)],
+              colors: [
+                Color(0xFF2E2A8A),
+                Color(0xFF1A0F3D),
+                Color(0xFF120014),
+                Color(0xFF000000),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -473,10 +502,31 @@ void _showSuccessDialog(BuildContext context) {
     context: context,
     builder: (_) {
       return Dialog(
-        backgroundColor: const Color(0xFF1E1E3F),
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF2E2A8A),
+                Color(0xFF1A0F3D),
+                Color(0xFF120014),
+                Color(0xFF000000),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.4),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
