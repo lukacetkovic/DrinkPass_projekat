@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import '../navigation/app_routes.dart';
 
 class HomeScreen extends StatelessWidget {
   final bool isLoggedIn;
 
   const HomeScreen({
     super.key,
-    this.isLoggedIn = false,
+    this.isLoggedIn = true,
   });
 
   static const LinearGradient backgroundGradient = LinearGradient(
@@ -42,23 +43,24 @@ class HomeScreen extends StatelessWidget {
                       Image.asset('assets/images/LOGO.png', height: 50),
                       const SizedBox(height: 26),
                       _searchBar(),
-
                       const SizedBox(height: 32),
+
                       _sectionTitle('TOP PICK'),
                       const SizedBox(height: 18),
-                      _topPick(isLoggedIn),
+                      _topPick(context),
 
                       const SizedBox(height: 40),
                       _sectionTitle('MOST POPULAR'),
                       const SizedBox(height: 18),
-                      _popularGrid(isLoggedIn),
+                      _popularGrid(),
 
                       if (isLoggedIn) ...[
                         const SizedBox(height: 40),
                         _sectionTitle('BEST OFFERS'),
                         const SizedBox(height: 18),
-                        _bestOffersGrid(isLoggedIn),
+                        _bestOffersGrid(),
                       ],
+
                       const SizedBox(height: 60),
                     ],
                   ),
@@ -82,8 +84,8 @@ class HomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white.withOpacity(0.14)),
       ),
-      child: Row(
-        children: const [
+      child: const Row(
+        children: [
           Icon(Icons.search, color: Colors.white70, size: 20),
           SizedBox(width: 10),
           Text(
@@ -117,84 +119,58 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _topPick(bool isLoggedIn) {
+  Widget _topPick(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: Stack(
-          children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Image.asset(
-                'assets/images/PUPIN_BAR.png',
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.75),
-                  ],
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.clubDetails),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: Stack(
+            children: [
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Image.asset(
+                  'assets/images/PUPIN_BAR.png',
+                  fit: BoxFit.cover,
                 ),
               ),
-            ),
-            if (isLoggedIn)
-              Positioned(
-                bottom: 18,
-                left: 18,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    gradient: primaryGradient,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Text(
-                    'JACK DANIELS + COLA x2 = 50€',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                      color: Colors.white,
-                    ),
-                  ),
+              if (isLoggedIn)
+                Positioned(
+                  bottom: 16,
+                  left: 16,
+                  child: _offerTag('JACK DANIELS + COLA x2 = 50€'),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _popularGrid(bool isLoggedIn) {
+  Widget _popularGrid() {
     return _grid([
       _card('assets/images/BAJA_MALI.png', 'SPLAV DVA GALEBA',
-          'Baja Mali Knindza', 'GIN & TONIC x2 = 70€', isLoggedIn, 4.5),
+          'Baja Mali Knindza', 'GIN & TONIC x2 = 70€'),
       _card('assets/images/ALEKSANDRA.png', 'SPLAV CRISTAL',
-          'Aleksandra Prijovic', 'VODKA + ENERGY = 80€', isLoggedIn, 5),
-      _card('assets/images/PERLA.png', 'SPLAV PERLA', 'El Fuego bend',
-          'WHISKEY SOUR = 40€', isLoggedIn, 4),
-      _card('assets/images/SHOWROOM.png', 'SHOWROOM', 'Boban Rajovic',
-          'MOJITO NIGHT = 10€', isLoggedIn, 4.5),
+          'Aleksandra Prijovic', 'VODKA + ENERGY = 80€'),
+      _card('assets/images/PERLA.png', 'SPLAV PERLA',
+          'El Fuego bend', 'WHISKEY SOUR = 40€'),
+      _card('assets/images/SHOWROOM.png', 'SHOWROOM',
+          'Boban Rajovic', 'MOJITO NIGHT = 10€'),
     ]);
   }
 
-  Widget _bestOffersGrid(bool isLoggedIn) {
+  Widget _bestOffersGrid() {
     return _grid([
       _card('assets/images/WERIGE.png', 'WERIGE', 'Biba',
-          'WHISKEY + 4 COLA = 40€', isLoggedIn, 4),
+          'WHISKEY + 4 COLA = 40€'),
       _card('assets/images/PARADISO.png', 'PARADISO', 'Nucci',
-          'VODKA + 4 JUICE = 70€', isLoggedIn, 4.5),
-      _card('assets/images/DISKONT.png', 'DISKONT BAR', 'DJ Party',
-          'VODKA + 4 JUICE = 60€', isLoggedIn, 4),
-      _card('assets/images/KALEM.png', 'KALEM', 'Live band',
-          'APEROL = 20€', isLoggedIn, 3.5),
+          'VODKA + 4 JUICE = 70€'),
+      _card('assets/images/DISKONT.png', 'DISKONT BAR',
+          'DJ Party', 'VODKA + 4 JUICE = 60€'),
+      _card('assets/images/KALEM.png', 'KALEM',
+          'Live band', 'APEROL = 20€'),
     ]);
   }
 
@@ -218,8 +194,6 @@ class HomeScreen extends StatelessWidget {
     String title,
     String subtitle,
     String offer,
-    bool isLoggedIn,
-    double rating,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,31 +206,14 @@ class HomeScreen extends StatelessWidget {
                 aspectRatio: 1,
                 child: Image.asset(
                   image,
-                  width: double.infinity,
                   fit: BoxFit.cover,
                 ),
               ),
               if (isLoggedIn)
                 Positioned(
-                  bottom: 10,
-                  left: 10,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      gradient: primaryGradient,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      offer,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                  bottom: 8,
+                  left: 8,
+                  child: _offerTag(offer),
                 ),
             ],
           ),
@@ -279,22 +236,26 @@ class HomeScreen extends StatelessWidget {
             color: Colors.white70,
           ),
         ),
-        if (isLoggedIn) ...[
-          const SizedBox(height: 4),
-          Row(
-            children: List.generate(
-              5,
-              (index) => Icon(
-                index < rating.floor()
-                    ? Icons.star
-                    : Icons.star_border,
-                size: 14,
-                color: Colors.amber,
-              ),
-            ),
-          ),
-        ],
       ],
+    );
+  }
+
+  Widget _offerTag(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        gradient: primaryGradient,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 

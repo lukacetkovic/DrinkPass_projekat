@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../navigation/app_routes.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -124,7 +125,12 @@ class LoginScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 35),
                           child: GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.pushReplacementNamed(
+                                context,
+                                AppRoutes.home,
+                              );
+                            },
                             child: Container(
                               width: double.infinity,
                               height: 60,
