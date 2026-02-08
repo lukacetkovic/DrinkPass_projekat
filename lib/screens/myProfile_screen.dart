@@ -6,7 +6,7 @@ class MyProfileScreen extends StatelessWidget {
 
   const MyProfileScreen({
     super.key,
-    this.isLoggedIn = false,
+    this.isLoggedIn = true,
   });
 
   @override
