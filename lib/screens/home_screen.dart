@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../navigation/app_routes.dart';
+import '../state/auth_state.dart';
 
 class HomeScreen extends StatelessWidget {
-  final bool isLoggedIn;
-
-  const HomeScreen({
-    super.key,
-    this.isLoggedIn = true,
-  });
+  const HomeScreen({super.key});
 
   static const LinearGradient backgroundGradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -28,6 +26,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = context.watch<AuthState>().isLoggedIn;
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: backgroundGradient),
@@ -42,23 +42,24 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       Image.asset('assets/images/LOGO.png', height: 50),
                       const SizedBox(height: 26),
+
                       _searchBar(),
                       const SizedBox(height: 32),
 
                       _sectionTitle('TOP PICK'),
                       const SizedBox(height: 18),
-                      _topPick(context),
+                      _topPick(context, isLoggedIn),
 
                       const SizedBox(height: 40),
                       _sectionTitle('MOST POPULAR'),
                       const SizedBox(height: 18),
-                      _popularGrid(),
+                      _popularGrid(isLoggedIn),
 
                       if (isLoggedIn) ...[
                         const SizedBox(height: 40),
                         _sectionTitle('BEST OFFERS'),
                         const SizedBox(height: 18),
-                        _bestOffersGrid(),
+                        _bestOffersGrid(isLoggedIn),
                       ],
 
                       const SizedBox(height: 60),
@@ -119,7 +120,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _topPick(BuildContext context) {
+
+  Widget _topPick(BuildContext context, bool isLoggedIn) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: GestureDetector(
@@ -148,31 +150,72 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _popularGrid() {
+  Widget _popularGrid(bool isLoggedIn) {
     return _grid([
-      _card('assets/images/BAJA_MALI.png', 'SPLAV DVA GALEBA',
-          'Baja Mali Knindza', 'GIN & TONIC x2 = 70€'),
-      _card('assets/images/ALEKSANDRA.png', 'SPLAV CRISTAL',
-          'Aleksandra Prijovic', 'VODKA + ENERGY = 80€'),
-      _card('assets/images/PERLA.png', 'SPLAV PERLA',
-          'El Fuego bend', 'WHISKEY SOUR = 40€'),
-      _card('assets/images/SHOWROOM.png', 'SHOWROOM',
-          'Boban Rajovic', 'MOJITO NIGHT = 10€'),
+      _card(
+        image: 'assets/images/BAJA_MALI.png',
+        title: 'SPLAV DVA GALEBA',
+        subtitle: 'Baja Mali Knindza',
+        offer: 'GIN & TONIC x2 = 70€',
+        isLoggedIn: isLoggedIn,
+      ),
+      _card(
+        image: 'assets/images/ALEKSANDRA.png',
+        title: 'SPLAV CRISTAL',
+        subtitle: 'Aleksandra Prijovic',
+        offer: 'VODKA + ENERGY = 80€',
+        isLoggedIn: isLoggedIn,
+      ),
+      _card(
+        image: 'assets/images/PERLA.png',
+        title: 'SPLAV PERLA',
+        subtitle: 'El Fuego bend',
+        offer: 'WHISKEY SOUR = 40€',
+        isLoggedIn: isLoggedIn,
+      ),
+      _card(
+        image: 'assets/images/SHOWROOM.png',
+        title: 'SHOWROOM',
+        subtitle: 'Boban Rajovic',
+        offer: 'MOJITO NIGHT = 10€',
+        isLoggedIn: isLoggedIn,
+      ),
     ]);
   }
 
-  Widget _bestOffersGrid() {
+  Widget _bestOffersGrid(bool isLoggedIn) {
     return _grid([
-      _card('assets/images/WERIGE.png', 'WERIGE', 'Biba',
-          'WHISKEY + 4 COLA = 40€'),
-      _card('assets/images/PARADISO.png', 'PARADISO', 'Nucci',
-          'VODKA + 4 JUICE = 70€'),
-      _card('assets/images/DISKONT.png', 'DISKONT BAR',
-          'DJ Party', 'VODKA + 4 JUICE = 60€'),
-      _card('assets/images/KALEM.png', 'KALEM',
-          'Live band', 'APEROL = 20€'),
+      _card(
+        image: 'assets/images/WERIGE.png',
+        title: 'WERIGE',
+        subtitle: 'Biba',
+        offer: 'WHISKEY + 4 COLA = 40€',
+        isLoggedIn: isLoggedIn,
+      ),
+      _card(
+        image: 'assets/images/PARADISO.png',
+        title: 'PARADISO',
+        subtitle: 'Nucci',
+        offer: 'VODKA + 4 JUICE = 70€',
+        isLoggedIn: isLoggedIn,
+      ),
+      _card(
+        image: 'assets/images/DISKONT.png',
+        title: 'DISKONT BAR',
+        subtitle: 'DJ Party',
+        offer: 'VODKA + 4 JUICE = 60€',
+        isLoggedIn: isLoggedIn,
+      ),
+      _card(
+        image: 'assets/images/KALEM.png',
+        title: 'KALEM',
+        subtitle: 'Live band',
+        offer: 'APEROL = 20€',
+        isLoggedIn: isLoggedIn,
+      ),
     ]);
   }
+
 
   Widget _grid(List<Widget> items) {
     return Padding(
@@ -189,12 +232,13 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _card(
-    String image,
-    String title,
-    String subtitle,
-    String offer,
-  ) {
+  Widget _card({
+    required String image,
+    required String title,
+    required String subtitle,
+    required String offer,
+    required bool isLoggedIn,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -204,10 +248,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               AspectRatio(
                 aspectRatio: 1,
-                child: Image.asset(
-                  image,
-                  fit: BoxFit.cover,
-                ),
+                child: Image.asset(image, fit: BoxFit.cover),
               ),
               if (isLoggedIn)
                 Positioned(

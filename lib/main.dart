@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'navigation/app_routes.dart';
+import 'state/auth_state.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/clubDetails_screen.dart';
@@ -8,7 +11,12 @@ import 'screens/createNewAcc_screen.dart';
 import 'screens/myProfile_screen.dart';
 
 void main() {
-  runApp(const DrinkPassApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AuthState(),
+      child: const DrinkPassApp(),
+    ),
+  );
 }
 
 class DrinkPassApp extends StatelessWidget {

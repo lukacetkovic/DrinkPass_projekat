@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../navigation/app_routes.dart';
+import 'package:provider/provider.dart';
+import '../state/auth_state.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -126,6 +128,7 @@ class LoginScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 35),
                           child: GestureDetector(
                             onTap: () {
+                              context.read<AuthState>().login();
                               Navigator.pushReplacementNamed(
                                 context,
                                 AppRoutes.home,
@@ -164,7 +167,12 @@ class LoginScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 13),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.pushReplacementNamed(
+                              context,
+                              AppRoutes.home,
+                            );
+                          },
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 120),
                             padding: const EdgeInsets.symmetric(vertical: 6),
@@ -205,7 +213,12 @@ class LoginScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               GestureDetector(
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.createAccount,
+                                  );
+                                },
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
