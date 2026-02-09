@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../state/auth_state.dart';
+import '../navigation/app_routes.dart';
 
 class CreateNewAccScreen extends StatelessWidget {
   const CreateNewAccScreen({super.key});
@@ -47,8 +50,9 @@ class CreateNewAccScreen extends StatelessWidget {
                             gradient: primaryGradient,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFF4D6D)
-                                    .withOpacity(0.35),
+                                color: const Color(
+                                  0xFFFF4D6D,
+                                ).withOpacity(0.35),
                                 blurRadius: 50,
                                 offset: const Offset(0, 18),
                               ),
@@ -128,7 +132,13 @@ class CreateNewAccScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 35),
                           child: GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              context.read<AuthState>().login();
+                              Navigator.pushReplacementNamed(
+                                context,
+                                AppRoutes.home,
+                              );
+                            },
                             child: Container(
                               width: double.infinity,
                               height: 60,
@@ -137,8 +147,9 @@ class CreateNewAccScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(32),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFFFF4D6D)
-                                        .withOpacity(0.6),
+                                    color: const Color(
+                                      0xFFFF4D6D,
+                                    ).withOpacity(0.6),
                                     blurRadius: 30,
                                     offset: const Offset(0, 6),
                                   ),
@@ -165,8 +176,7 @@ class CreateNewAccScreen extends StatelessWidget {
                             Navigator.pop(context);
                           },
                           child: Container(
-                            margin:
-                                const EdgeInsets.symmetric(horizontal: 120),
+                            margin: const EdgeInsets.symmetric(horizontal: 120),
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.08),

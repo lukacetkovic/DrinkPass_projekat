@@ -1,4 +1,5 @@
 class AppRoutes {
+  static const authGate = '/';
   static const home = '/home';
   static const clubDetails = '/club-details';
   static const login = '/login';

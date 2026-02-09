@@ -9,6 +9,7 @@ import 'screens/clubDetails_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/createNewAcc_screen.dart';
 import 'screens/myProfile_screen.dart';
+import 'screens/auth_gate.dart';
 
 void main() {
   runApp(
@@ -26,8 +27,9 @@ class DrinkPassApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.login,
+      initialRoute: AppRoutes.authGate,
       routes: {
+        AppRoutes.authGate: (context) => const AuthGate(),
         AppRoutes.home: (context) => const HomeScreen(),
         AppRoutes.clubDetails: (context) => const ClubDetailsScreen(),
         AppRoutes.login: (context) => const LoginScreen(),
