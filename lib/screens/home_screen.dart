@@ -67,7 +67,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              _glassBottomNav(),
+              _glassBottomNav(context), // moramo da dodamo i "contenxt" jer widget prima build context 
             ],
           ),
         ),
@@ -119,7 +119,6 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _topPick(BuildContext context, bool isLoggedIn) {
     return Padding(
@@ -216,7 +215,6 @@ class HomeScreen extends StatelessWidget {
     ]);
   }
 
-
   Widget _grid(List<Widget> items) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -251,11 +249,7 @@ class HomeScreen extends StatelessWidget {
                 child: Image.asset(image, fit: BoxFit.cover),
               ),
               if (isLoggedIn)
-                Positioned(
-                  bottom: 8,
-                  left: 8,
-                  child: _offerTag(offer),
-                ),
+                Positioned(bottom: 8, left: 8, child: _offerTag(offer)),
             ],
           ),
         ),
@@ -300,7 +294,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _glassBottomNav() {
+  Widget _glassBottomNav(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -312,16 +306,36 @@ class HomeScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              gradient: primaryGradient,
-              borderRadius: BorderRadius.circular(16),
+          // Dodajemo da HOME dugme ima neku fuknciju - to jest da samo ide opet na HOME PAGE
+          GestureDetector(
+            onTap: () {
+              Navigator.pushReplacementNamed(context, AppRoutes.home);
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: primaryGradient,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.home, color: Colors.white),
             ),
-            child: const Icon(Icons.home, color: Colors.white),
           ),
-          Image.asset('assets/images/LOGO.png', height: 42),
-          const Icon(Icons.person_outline, color: Colors.white),
+
+          // Dodajemo da LOGO isto ima neku fukcniju, i on da vraca na HOME 
+          GestureDetector(
+            onTap: () {
+              Navigator.pushReplacementNamed(context, AppRoutes.home);
+            },
+            child: Image.asset('assets/images/LOGO.png', height: 42),
+          ),
+
+          // Dodajemo da MY PROFILE vraca na MY PROFILE screen 
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.profile);
+            },
+            child: const Icon(Icons.person_outline, color: Colors.white),
+          ),
         ],
       ),
     );

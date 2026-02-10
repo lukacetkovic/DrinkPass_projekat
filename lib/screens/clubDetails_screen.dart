@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../navigation/app_routes.dart';
 
 class ClubDetailsScreen extends StatelessWidget {
   final bool isLoggedIn;
@@ -47,7 +48,7 @@ class ClubDetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
-            _glassBottomNav(),
+            _glassBottomNav(context),
           ],
         ),
       ),
@@ -292,32 +293,52 @@ const LinearGradient primaryGradient = LinearGradient(
   end: Alignment.centerRight,
 );
 
-Widget _glassBottomNav() {
-  return Container(
-    margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-    padding: const EdgeInsets.symmetric(vertical: 10),
-    decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.08),
-      borderRadius: BorderRadius.circular(28),
-      border: Border.all(color: Colors.white24),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            gradient: primaryGradient,
-            borderRadius: BorderRadius.circular(16),
+Widget _glassBottomNav(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // Dodajemo da HOME dugme ima neku fuknciju - to jest da samo ide opet na HOME PAGE
+          GestureDetector(
+            onTap: () {
+              Navigator.pushReplacementNamed(context, AppRoutes.home);
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: primaryGradient,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.home, color: Colors.white),
+            ),
           ),
-          child: const Icon(Icons.home, color: Colors.white),
-        ),
-        Image.asset('assets/images/LOGO.png', height: 42),
-        const Icon(Icons.person_outline, color: Colors.white),
-      ],
-    ),
-  );
-}
+
+          // Dodajemo da LOGO isto ima neku fukcniju, i on da vraca na HOME 
+          GestureDetector(
+            onTap: () {
+              Navigator.pushReplacementNamed(context, AppRoutes.home);
+            },
+            child: Image.asset('assets/images/LOGO.png', height: 42),
+          ),
+
+          // Dodajemo da MY PROFILE vraca na MY PROFILE screen 
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.profile);
+            },
+            child: const Icon(Icons.person_outline, color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
 
 void _showConfirmReservationDialog(BuildContext context) {
   showDialog(
