@@ -1,16 +1,31 @@
 import 'package:flutter/material.dart';
-import '../navigation/app_routes.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
+import '../navigation/app_routes.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [Color(0xFFFF4D6D), Color(0xFFB5179E)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +52,14 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    /// ---------- TOP ----------
                     Column(
                       children: [
                         const SizedBox(height: 32),
                         Image.asset('assets/images/LOGO.png', height: 56),
                         const SizedBox(height: 50),
+
+                        /// AVATAR
                         Container(
                           width: 180,
                           height: 180,
@@ -50,9 +68,7 @@ class LoginScreen extends StatelessWidget {
                             gradient: primaryGradient,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(
-                                  0xFFFF4D6D,
-                                ).withOpacity(0.35),
+                                color: const Color(0xFFFF4D6D).withOpacity(0.35),
                                 blurRadius: 50,
                                 offset: const Offset(0, 18),
                               ),
@@ -70,6 +86,7 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 15),
                         const Text(
                           'WELCOME',
@@ -94,6 +111,7 @@ class LoginScreen extends StatelessWidget {
                             height: 1.4,
                           ),
                         ),
+
                         const SizedBox(height: 40),
                         Container(
                           margin: const EdgeInsets.symmetric(horizontal: 28),
@@ -108,31 +126,40 @@ class LoginScreen extends StatelessWidget {
                           child: Column(
                             children: [
                               _inputField(
-                                hint: 'Username',
-                                icon: Icons.person_outline,
+                                hint: 'Email',
+                                icon: Icons.mail_outline,
+                                controller: _emailController,
                               ),
                               const SizedBox(height: 15),
                               _inputField(
                                 hint: 'Password',
                                 icon: Icons.lock_outline,
                                 obscure: true,
+                                controller: _passwordController,
                               ),
                             ],
                           ),
                         ),
                       ],
                     ),
+
+                    /// ---------- BOTTOM ----------
                     Column(
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 35),
                           child: GestureDetector(
-                            onTap: () {
-                              context.read<AuthState>().login();
-                              Navigator.pushReplacementNamed(
-                                context,
-                                AppRoutes.home,
-                              );
+                            onTap: () async {
+                              try {
+                                await context.read<AuthState>().login(
+                                  email: _emailController.text.trim(),
+                                  password: _passwordController.text.trim(),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
                             },
                             child: Container(
                               width: double.infinity,
@@ -142,9 +169,7 @@ class LoginScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(32),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(
-                                      0xFFFF4D6D,
-                                    ).withOpacity(0.6),
+                                    color: const Color(0xFFFF4D6D).withOpacity(0.6),
                                     blurRadius: 30,
                                     offset: const Offset(0, 6),
                                   ),
@@ -165,6 +190,7 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 13),
                         GestureDetector(
                           onTap: () {
@@ -197,6 +223,7 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 50),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
@@ -262,24 +289,21 @@ class LoginScreen extends StatelessWidget {
   Widget _inputField({
     required String hint,
     required IconData icon,
+    required TextEditingController controller,
     bool obscure = false,
   }) {
     return TextField(
+      controller: controller,
       obscureText: obscure,
       style: const TextStyle(color: Colors.white, fontFamily: 'Poppins'),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(
-          color: Colors.white54,
-          fontFamily: 'Poppins',
-        ),
+        hintStyle: const TextStyle(color: Colors.white54),
         prefixIcon: Icon(icon, color: Colors.white70),
         filled: true,
         fillColor: Colors.white.withOpacity(0.1),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 16,
-        ),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide.none,

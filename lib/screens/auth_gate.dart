@@ -9,20 +9,22 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedIn = context.watch<AuthState>().isLoggedIn;
+    return Consumer<AuthState>(
+      builder: (context, authState, _) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (authState.isLoggedIn) {
+            Navigator.pushReplacementNamed(context, AppRoutes.home);
+          } else {
+            Navigator.pushReplacementNamed(context, AppRoutes.login);
+          }
+        });
 
-    Future.microtask(() {
-      if (isLoggedIn) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
-      } else {
-        Navigator.pushReplacementNamed(context, AppRoutes.login);
-      }
-    });
-    
-    return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
+        return const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
     );
   }
 }

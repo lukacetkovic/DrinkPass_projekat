@@ -14,12 +14,10 @@ import 'screens/createNewAcc_screen.dart';
 import 'screens/myProfile_screen.dart';
 import 'screens/auth_gate.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
     ChangeNotifierProvider(
@@ -41,8 +39,10 @@ class DrinkPassApp extends StatelessWidget {
         AppRoutes.authGate: (context) => const AuthGate(),
         AppRoutes.home: (context) => const HomeScreen(),
         AppRoutes.clubDetails: (context) => const ClubDetailsScreen(),
-        AppRoutes.login: (context) => const LoginScreen(),
-        AppRoutes.createAccount: (context) => const CreateNewAccScreen(),
+
+        AppRoutes.login: (context) => LoginScreen(),
+        AppRoutes.createAccount: (context) => CreateNewAccScreen(),
+
         AppRoutes.profile: (context) => const MyProfileScreen(),
       },
     );

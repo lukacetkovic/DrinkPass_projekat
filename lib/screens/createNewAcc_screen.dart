@@ -1,16 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../state/auth_state.dart';
 import '../navigation/app_routes.dart';
+import '../state/auth_state.dart';
 
-class CreateNewAccScreen extends StatelessWidget {
+
+class CreateNewAccScreen extends StatefulWidget {
   const CreateNewAccScreen({super.key});
 
+  @override
+  State<CreateNewAccScreen> createState() => _CreateNewAccScreenState();
+}
+class _CreateNewAccScreenState extends State<CreateNewAccScreen> {
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [Color(0xFFFF4D6D), Color(0xFFB5179E)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
+
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _isLoading = false;
+
+  Future<void> _createAccount() async {
+    setState(() => _isLoading = true);
+
+    try {
+      await context.read<AuthState>().register(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
+
+          if (!mounted) return;
+
+Navigator.pushReplacementNamed(context, AppRoutes.home);
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +86,7 @@ class CreateNewAccScreen extends StatelessWidget {
                         const SizedBox(height: 32),
                         Image.asset('assets/images/LOGO.png', height: 56),
                         const SizedBox(height: 50),
+
                         Container(
                           width: 180,
                           height: 180,
@@ -50,9 +95,8 @@ class CreateNewAccScreen extends StatelessWidget {
                             gradient: primaryGradient,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(
-                                  0xFFFF4D6D,
-                                ).withOpacity(0.35),
+                                color: const Color(0xFFFF4D6D)
+                                    .withOpacity(0.35),
                                 blurRadius: 50,
                                 offset: const Offset(0, 18),
                               ),
@@ -70,6 +114,7 @@ class CreateNewAccScreen extends StatelessWidget {
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 15),
                         const Text(
                           'CREATE NEW ACCOUNT',
@@ -94,6 +139,7 @@ class CreateNewAccScreen extends StatelessWidget {
                             height: 1.4,
                           ),
                         ),
+
                         const SizedBox(height: 40),
                         Container(
                           margin: const EdgeInsets.symmetric(horizontal: 28),
@@ -108,16 +154,19 @@ class CreateNewAccScreen extends StatelessWidget {
                           child: Column(
                             children: [
                               _inputField(
+                                controller: _usernameController,
                                 hint: 'Username',
                                 icon: Icons.person_outline,
                               ),
                               const SizedBox(height: 15),
                               _inputField(
+                                controller: _emailController,
                                 hint: 'Email',
                                 icon: Icons.mail_outline,
                               ),
                               const SizedBox(height: 15),
                               _inputField(
+                                controller: _passwordController,
                                 hint: 'Password',
                                 icon: Icons.lock_outline,
                                 obscure: true,
@@ -127,18 +176,14 @@ class CreateNewAccScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 35),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 35),
                           child: GestureDetector(
-                            onTap: () {
-                              context.read<AuthState>().login();
-                              Navigator.pushReplacementNamed(
-                                context,
-                                AppRoutes.home,
-                              );
-                            },
+                            onTap: _isLoading ? null : _createAccount,
                             child: Container(
                               width: double.infinity,
                               height: 60,
@@ -147,37 +192,41 @@ class CreateNewAccScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(32),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(
-                                      0xFFFF4D6D,
-                                    ).withOpacity(0.6),
+                                    color: const Color(0xFFFF4D6D)
+                                        .withOpacity(0.6),
                                     blurRadius: 30,
                                     offset: const Offset(0, 6),
                                   ),
                                 ],
                               ),
-                              child: const Center(
-                                child: Text(
-                                  'CREATE ACCOUNT',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 18,
-                                    letterSpacing: 0.7,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                              child: Center(
+                                child: _isLoading
+                                    ? const CircularProgressIndicator(
+                                        color: Colors.white,
+                                      )
+                                    : const Text(
+                                        'CREATE ACCOUNT',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 18,
+                                          letterSpacing: 0.7,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                               ),
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 10),
                         GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
+                          onTap: () => Navigator.pop(context),
                           child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 120),
-                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 120),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.08),
                               borderRadius: BorderRadius.circular(18),
@@ -213,11 +262,13 @@ class CreateNewAccScreen extends StatelessWidget {
   }
 
   Widget _inputField({
+    required TextEditingController controller,
     required String hint,
     required IconData icon,
     bool obscure = false,
   }) {
     return TextField(
+      controller: controller,
       obscureText: obscure,
       style: const TextStyle(color: Colors.white, fontFamily: 'Poppins'),
       decoration: InputDecoration(

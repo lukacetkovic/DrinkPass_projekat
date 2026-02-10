@@ -1,17 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthState extends ChangeNotifier {
-  bool _isLoggedIn = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  bool get isLoggedIn => _isLoggedIn;
+  User? _user;
 
-  void login() {
-    _isLoggedIn = true;
-    notifyListeners();
+  AuthState() {
+
+    _auth.authStateChanges().listen((user) {
+      _user = user;
+      notifyListeners();
+    });
   }
 
-  void logout() {
-    _isLoggedIn = false;
-    notifyListeners();
+  User? get user => _user;
+
+  bool get isLoggedIn => _user != null;
+
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
+    await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  Future<void> register({
+    required String email,
+    required String password,
+  }) async {
+    await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  Future<void> logout() async {
+    await _auth.signOut();
   }
 }
