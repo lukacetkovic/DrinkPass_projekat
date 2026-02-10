@@ -7,6 +7,23 @@ import '../navigation/app_routes.dart';
 class MyProfileScreen extends StatelessWidget {
   const MyProfileScreen({super.key});
 
+  static const LinearGradient backgroundGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFF2E2A8A),
+      Color(0xFF1A0F3D),
+      Color(0xFF120014),
+      Color(0xFF000000),
+    ],
+  );
+
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [Color(0xFFFF4D6D), Color(0xFFB5179E)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+
   @override
   Widget build(BuildContext context) {
     final isLoggedIn = context.watch<AuthState>().isLoggedIn;
@@ -14,16 +31,7 @@ class MyProfileScreen extends StatelessWidget {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF2B2FAE),
-              Color(0xFF000000),
-            ],
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -32,7 +40,7 @@ class MyProfileScreen extends StatelessWidget {
                     ? _loggedInContent(context)
                     : _loggedOutContent(context),
               ),
-              _bottomNavBar(),
+              _glassBottomNav(context),
             ],
           ),
         ),
@@ -40,135 +48,195 @@ class MyProfileScreen extends StatelessWidget {
     );
   }
 
-
   Widget _loggedInContent(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset('assets/images/NEW_ACC_AVATAR.png', height: 180),
+        _avatarCircle('assets/images/NEW_ACC_AVATAR.png'),
         const SizedBox(height: 24),
 
         const Text(
           'Welcome back 👋',
           style: TextStyle(
-            color: Colors.white,
             fontFamily: 'Poppins',
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
+            fontSize: 26,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
           ),
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
 
         const Text(
           'user@email.com',
           style: TextStyle(
-            color: Colors.white70,
             fontFamily: 'Poppins',
             fontSize: 14,
+            color: Colors.white70,
           ),
         ),
 
-        const SizedBox(height: 32),
+        const SizedBox(height: 36),
 
-        SizedBox(
-          width: 220,
-          height: 52,
-          child: ElevatedButton(
-            onPressed: () {
-              context.read<AuthState>().logout();
-              Navigator.pushReplacementNamed(context, AppRoutes.login);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF4D6D),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(26),
-              ),
-            ),
-            child: const Text(
-              'LOG OUT',
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-              ),
-            ),
-          ),
+        _primaryButton(
+          text: 'LOG OUT',
+          onTap: () {
+            context.read<AuthState>().logout();
+            Navigator.pushReplacementNamed(context, AppRoutes.login);
+          },
         ),
       ],
     );
   }
-
 
   Widget _loggedOutContent(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset('assets/images/AVATAR3.png', height: 200),
+        _avatarCircle('assets/images/AVATAR3.png'),
         const SizedBox(height: 24),
 
         const Text(
           'You are not logged in',
           style: TextStyle(
-            color: Colors.white,
             fontFamily: 'Poppins',
             fontSize: 26,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
           ),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
 
         const Text(
           'Log in to unlock offers, ratings\nand personalized experience.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white70,
             fontFamily: 'Poppins',
             fontSize: 14,
+            color: Colors.white70,
+            height: 1.5,
           ),
         ),
 
-        const SizedBox(height: 32),
+        const SizedBox(height: 36),
 
-        SizedBox(
-          width: 260,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, AppRoutes.login);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF4D6D),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
-              ),
-            ),
-            child: const Text(
-              'LOGIN',
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w800,
-                fontSize: 18,
-              ),
-            ),
-          ),
+        _primaryButton(
+          text: 'LOGIN',
+          onTap: () {
+            Navigator.pushReplacementNamed(context, AppRoutes.login);
+          },
         ),
       ],
     );
   }
 
-  Widget _bottomNavBar() {
+  Widget _avatarCircle(String asset) {
+    return Container(
+      width: 180,
+      height: 180,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: primaryGradient,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF4D6D).withOpacity(0.35),
+            blurRadius: 50,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(6),
+      child: Container(
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color(0xFF0E1028),
+        ),
+        child: Image.asset(asset, fit: BoxFit.contain),
+      ),
+    );
+  }
+
+  Widget _primaryButton({
+    required String text,
+    required VoidCallback onTap,
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12, top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 48),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 56,
+          decoration: BoxDecoration(
+            gradient: primaryGradient,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF4D6D).withOpacity(0.6),
+                blurRadius: 30,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w800,
+                fontSize: 17,
+                letterSpacing: 0.8,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _glassBottomNav(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white24),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: const [
-          Icon(Icons.home, color: Colors.white, size: 28),
-          Icon(Icons.local_bar, color: Colors.white, size: 28),
-          Icon(Icons.person, color: Colors.orange, size: 28),
+        children: [
+          // Dodajemo da HOME dugme ima neku fuknciju - to jest da samo ide opet na HOME PAGE
+          GestureDetector(
+            onTap: () {
+              Navigator.pushReplacementNamed(context, AppRoutes.home);
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: primaryGradient,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.home, color: Colors.white),
+            ),
+          ),
+
+          // Dodajemo da LOGO isto ima neku fukcniju, i on da vraca na HOME 
+          GestureDetector(
+            onTap: () {
+              Navigator.pushReplacementNamed(context, AppRoutes.home);
+            },
+            child: Image.asset('assets/images/LOGO.png', height: 42),
+          ),
+
+          // Dodajemo da MY PROFILE vraca na MY PROFILE screen 
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.profile);
+            },
+            child: const Icon(Icons.person_outline, color: Colors.white),
+          ),
         ],
       ),
     );
