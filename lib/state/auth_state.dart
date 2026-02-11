@@ -28,14 +28,21 @@ class AuthState extends ChangeNotifier {
     );
   }
 
+
+
   Future<void> register({
     required String email,
     required String password,
+    required String displayName,
   }) async {
-    await _auth.createUserWithEmailAndPassword(
+    final cred = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
+    await cred.user?.updateDisplayName(displayName);
+    await cred.user?.reload();
+    _user = _auth.currentUser;
+    notifyListeners();
   }
 
   Future<void> logout() async {

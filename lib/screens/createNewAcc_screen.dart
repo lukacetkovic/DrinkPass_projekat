@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../navigation/app_routes.dart';
 import '../state/auth_state.dart';
 
@@ -23,26 +24,68 @@ class _CreateNewAccScreenState extends State<CreateNewAccScreen> {
 
   bool _isLoading = false;
 
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return emailRegex.hasMatch(email);
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
+  }
+
   Future<void> _createAccount() async {
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+      _showError('You have to type your username, email and password');
+      return;
+    }
+
+    if (!_isValidEmail(email)) {
+      _showError('Please enter a valid email format');
+      return;
+    }
+
+    if (password.length < 6) {
+      _showError('Password must be at least 6 characters');
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
       await context.read<AuthState>().register(
-            email: _emailController.text.trim(),
-            password: _passwordController.text.trim(),
+            email: email,
+            password: password,
+            displayName: username,
           );
 
-          if (!mounted) return;
+      if (!mounted) return;
 
-Navigator.pushReplacementNamed(context, AppRoutes.home);
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
 
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      if (e is FirebaseAuthException) {
+        final code = e.code.toLowerCase();
+        if (code == 'email-already-in-use') {
+          _showError('Email is already in use');
+        } else if (code == 'weak-password') {
+          _showError('Password is too weak');
+        } else if (code == 'invalid-email') {
+          _showError('Please enter a valid email format');
+        } else {
+          _showError('Registration failed. Please try again later');
+        }
+      } else {
+        _showError('Unexpected error. Please try again');
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

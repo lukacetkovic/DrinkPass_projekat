@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../state/auth_state.dart';
 import '../navigation/app_routes.dart';
 
@@ -27,6 +28,66 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  bool _isValidEmail(String email) {
+    final emailRegex =
+        RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return emailRegex.hasMatch(email);
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
+  }
+
+  Future<void> _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showError('You have to type your login info');
+      return;
+    }
+
+    if (!_isValidEmail(email)) {
+      _showError('Please enter a valid email format');
+      return;
+    }
+
+    try {
+      await context.read<AuthState>().login(
+            email: email,
+            password: password,
+          );
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    } catch (e) {
+      if (e is FirebaseAuthException) {
+        final code = e.code.toLowerCase();
+        if (code == 'user-not-found') {
+          _showError('No account found, please check your info again');
+        } else if (code == 'wrong-password') {
+          _showError('Incorrect password. Please try again');
+        } else if (code == 'invalid-email') {
+          _showError('Please enter a valid email format');
+        } else if (code == 'invalid-credential' ||
+            code == 'invalid-credentials' ||
+            code == 'invalid_login_credentials' ||
+            code == 'invalid_credentials') {
+          _showError('Incorrect email or password');
+        } else {
+          _showError('Login failed. Please try again later');
+        }
+      } else {
+        _showError('Unexpected error. Please try again');
+      }
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,14 +113,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    /// ---------- TOP ----------
                     Column(
                       children: [
                         const SizedBox(height: 32),
                         Image.asset('assets/images/LOGO.png', height: 56),
                         const SizedBox(height: 50),
 
-                        /// AVATAR
                         Container(
                           width: 180,
                           height: 180,
@@ -68,7 +127,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             gradient: primaryGradient,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFF4D6D).withOpacity(0.35),
+                                color: const Color(0xFFFF4D6D)
+                                    .withOpacity(0.35),
                                 blurRadius: 50,
                                 offset: const Offset(0, 18),
                               ),
@@ -114,7 +174,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         const SizedBox(height: 40),
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 28),
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 28),
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.08),
@@ -143,24 +204,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
 
-                    /// ---------- BOTTOM ----------
                     Column(
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 35),
                           child: GestureDetector(
-                            onTap: () async {
-                              try {
-                                await context.read<AuthState>().login(
-                                  email: _emailController.text.trim(),
-                                  password: _passwordController.text.trim(),
-                                );
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            },
+                            onTap: _handleLogin,
                             child: Container(
                               width: double.infinity,
                               height: 60,
@@ -169,7 +218,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(32),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFFFF4D6D).withOpacity(0.6),
+                                    color: const Color(0xFFFF4D6D)
+                                        .withOpacity(0.6),
                                     blurRadius: 30,
                                     offset: const Offset(0, 6),
                                   ),
@@ -200,8 +250,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           },
                           child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 120),
-                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 120),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.08),
                               borderRadius: BorderRadius.circular(18),
@@ -226,9 +278,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         const SizedBox(height: 50),
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
+                          padding:
+                              const EdgeInsets.only(bottom: 12),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment:
+                                MainAxisAlignment.center,
                             children: [
                               const Text(
                                 "Don't have an account?",
@@ -247,15 +301,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                   );
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
+                                  padding:
+                                      const EdgeInsets.symmetric(
                                     horizontal: 12,
                                     vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.07),
-                                    borderRadius: BorderRadius.circular(14),
+                                    color:
+                                        Colors.white.withOpacity(0.07),
+                                    borderRadius:
+                                        BorderRadius.circular(14),
                                     border: Border.all(
-                                      color: Colors.white.withOpacity(0.15),
+                                      color: Colors.white
+                                          .withOpacity(0.15),
                                       width: 1,
                                     ),
                                   ),
@@ -295,7 +353,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return TextField(
       controller: controller,
       obscureText: obscure,
-      style: const TextStyle(color: Colors.white, fontFamily: 'Poppins'),
+      style:
+          const TextStyle(color: Colors.white, fontFamily: 'Poppins'),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.white54),

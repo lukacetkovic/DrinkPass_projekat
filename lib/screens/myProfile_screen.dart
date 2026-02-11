@@ -49,6 +49,12 @@ class MyProfileScreen extends StatelessWidget {
   }
 
   Widget _loggedInContent(BuildContext context) {
+    final user = context.watch<AuthState>().user;
+    final displayName = user?.displayName?.trim();
+    final email = user?.email?.trim();
+    final nameToShow = (displayName != null && displayName.isNotEmpty)
+        ? displayName
+        : 'Guest';
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -67,14 +73,26 @@ class MyProfileScreen extends StatelessWidget {
 
         const SizedBox(height: 6),
 
-        const Text(
-          'user@email.com',
-          style: TextStyle(
+        Text(
+          nameToShow,
+          style: const TextStyle(
             fontFamily: 'Poppins',
-            fontSize: 14,
-            color: Colors.white70,
+            fontSize: 16,
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
           ),
         ),
+        if (email != null && email.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            email,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              color: Colors.white70,
+            ),
+          ),
+        ],
 
         const SizedBox(height: 36),
 
