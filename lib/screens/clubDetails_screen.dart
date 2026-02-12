@@ -449,7 +449,7 @@ Widget _glassBottomNav(BuildContext context) {
     );
   }
 
-Future<void> _createReservation(
+Future<bool> _createReservation(
   BuildContext context, {
   required String clubId,
   required String clubName,
@@ -460,7 +460,22 @@ Future<void> _createReservation(
   final user = context.read<AuthState>().user;
   if (user == null) {
     _showSimpleError(context, 'You must be logged in to reserve.');
-    return;
+    return false;
+  }
+
+  final existing = await FirebaseFirestore.instance
+      .collection('reservations')
+      .where('userId', isEqualTo: user.uid)
+      .where('clubId', isEqualTo: clubId)
+      .limit(1)
+      .get();
+  if (existing.docs.isNotEmpty) {
+    _showReservationInfoDialog(
+      context,
+      title: 'Reservation already exists',
+      message: 'You already have a reservation for this event.',
+    );
+    return false;
   }
 
   await FirebaseFirestore.instance.collection('reservations').add({
@@ -473,6 +488,7 @@ Future<void> _createReservation(
     'status': 'CONFIRMED',
     'createdAt': FieldValue.serverTimestamp(),
   });
+  return true;
 }
 
 void _showSimpleError(BuildContext context, String message) {
@@ -481,6 +497,125 @@ void _showSimpleError(BuildContext context, String message) {
       content: Text(message),
       backgroundColor: Colors.redAccent,
     ),
+  );
+}
+
+void _showReservationInfoDialog(
+  BuildContext context, {
+  required String title,
+  required String message,
+}) {
+  showDialog(
+    context: context,
+    builder: (_) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF2E2A8A),
+                Color(0xFF1A0F3D),
+                Color(0xFF120014),
+                Color(0xFF000000),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.4),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF4D6D), Color(0xFFB5179E)],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF4D6D).withOpacity(0.5),
+                      blurRadius: 24,
+                      offset: const Offset(0, 0),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.info, color: Colors.white, size: 36),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  color: Colors.white70,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF4D6D), Color(0xFFB5179E)],
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF4D6D).withOpacity(0.5),
+                          blurRadius: 24,
+                          offset: const Offset(0, 0),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'OK',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
   );
 }
 
@@ -638,7 +773,7 @@ void _showConfirmReservationDialog(
                       child: ElevatedButton(
                         onPressed: () async {
                           Navigator.pop(context);
-                          await _createReservation(
+                          final created = await _createReservation(
                             context,
                             clubId: clubId,
                             clubName: clubName,
@@ -646,7 +781,9 @@ void _showConfirmReservationDialog(
                             date: date,
                             time: time,
                           );
-                          _showSuccessDialog(context);
+                          if (created) {
+                            _showSuccessDialog(context);
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
