@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../navigation/app_routes.dart';
+import '../state/auth_state.dart';
 
 class ClubDetailsScreen extends StatelessWidget {
   final bool isLoggedIn;
@@ -96,6 +98,7 @@ class ClubDetailsScreen extends StatelessWidget {
                               _clubInfo(
                                 context,
                                 isLoggedIn,
+                                clubId,
                                 name,
                                 description,
                                 rating,
@@ -105,6 +108,7 @@ class ClubDetailsScreen extends StatelessWidget {
                                 time,
                                 date,
                                 phone,
+                                offer,
                               ),
                               const SizedBox(height: 24),
                               _mapSection(lat: lat, lng: lng),
@@ -193,6 +197,7 @@ Widget _headerImage(
 Widget _clubInfo(
   BuildContext context,
   bool isLoggedIn,
+  String clubId,
   String name,
   String description,
   int rating,
@@ -202,6 +207,7 @@ Widget _clubInfo(
   String time,
   String date,
   String phone,
+  String offer,
 ) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -245,7 +251,14 @@ Widget _clubInfo(
         const SizedBox(height: 24),
 
         GestureDetector(
-          onTap: () => _showConfirmReservationDialog(context),
+          onTap: () => _showConfirmReservationDialog(
+            context,
+            clubId: clubId,
+            clubName: name,
+            offer: offer,
+            date: date,
+            time: time,
+          ),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -436,7 +449,49 @@ Widget _glassBottomNav(BuildContext context) {
     );
   }
 
-void _showConfirmReservationDialog(BuildContext context) {
+Future<void> _createReservation(
+  BuildContext context, {
+  required String clubId,
+  required String clubName,
+  required String offer,
+  required String date,
+  required String time,
+}) async {
+  final user = context.read<AuthState>().user;
+  if (user == null) {
+    _showSimpleError(context, 'You must be logged in to reserve.');
+    return;
+  }
+
+  await FirebaseFirestore.instance.collection('reservations').add({
+    'userId': user.uid,
+    'clubId': clubId,
+    'clubName': clubName,
+    'offer': offer,
+    'date': date,
+    'time': time,
+    'status': 'CONFIRMED',
+    'createdAt': FieldValue.serverTimestamp(),
+  });
+}
+
+void _showSimpleError(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.redAccent,
+    ),
+  );
+}
+
+void _showConfirmReservationDialog(
+  BuildContext context, {
+  required String clubId,
+  required String clubName,
+  required String offer,
+  required String date,
+  required String time,
+}) {
   showDialog(
     context: context,
     barrierColor: Colors.black.withOpacity(0.6),
@@ -491,31 +546,31 @@ void _showConfirmReservationDialog(BuildContext context) {
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(
-                  children: const [
+                  children: [
                     Text(
-                      'PUPIN PUB',
-                      style: TextStyle(
+                      clubName.isEmpty ? 'CLUB' : clubName,
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
                     Text(
-                      'Jack Daniels + Cola x2 = 50 EUR',
-                      style: TextStyle(
+                      offer.isEmpty ? 'Offer' : offer,
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,
                         color: Colors.white70,
                       ),
                     ),
-                    SizedBox(height: 12),
-                    Divider(color: Colors.white24),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
+                    const Divider(color: Colors.white24),
+                    const SizedBox(height: 12),
                     Text(
-                      'DATE: 15.02.2026.',
-                      style: TextStyle(
+                      'DATE: ${date.isEmpty ? '-' : date}',
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -524,8 +579,8 @@ void _showConfirmReservationDialog(BuildContext context) {
                       ),
                     ),
                     Text(
-                      'TIME: 21:00h - 01:00h',
-                      style: TextStyle(
+                      'TIME: ${time.isEmpty ? '-' : time}',
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -581,8 +636,16 @@ void _showConfirmReservationDialog(BuildContext context) {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.pop(context);
+                          await _createReservation(
+                            context,
+                            clubId: clubId,
+                            clubName: clubName,
+                            offer: offer,
+                            date: date,
+                            time: time,
+                          );
                           _showSuccessDialog(context);
                         },
                         style: ElevatedButton.styleFrom(
@@ -697,6 +760,7 @@ void _showSuccessDialog(BuildContext context) {
                 child: GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, AppRoutes.profile);
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 14),
