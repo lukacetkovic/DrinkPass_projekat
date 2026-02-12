@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../navigation/app_routes.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../state/auth_state.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -35,31 +36,82 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             children: [
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(bottom: 28),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 24),
-                      Image.asset('assets/images/LOGO.png', height: 50),
-                      const SizedBox(height: 26),
-                      _searchBar(),
-                      const SizedBox(height: 32),
-                      _sectionTitle('TOP PICK'),
-                      const SizedBox(height: 18),
-                      _topPick(context, isLoggedIn),
-                      const SizedBox(height: 40),
-                      _sectionTitle('MOST POPULAR'),
-                      const SizedBox(height: 18),
-                      _popularGrid(context, isLoggedIn),
-                      if (isLoggedIn) ...[
-                        const SizedBox(height: 40),
-                        _sectionTitle('BEST OFFERS'),
-                        const SizedBox(height: 18),
-                        _bestOffersGrid(context, isLoggedIn),
-                      ],
-                      const SizedBox(height: 60),
-                    ],
-                  ),
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('clubs')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return const Center(
+                        child: Text(
+                          'Failed to load clubs',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      );
+                    }
+
+                    final docs = snapshot.data?.docs ?? [];
+                    final clubs = docs.map((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      return {
+                        ...data,
+                        'id': doc.id,
+                      };
+                    }).toList();
+
+                    debugPrint('Clubs loaded: ${clubs.length}');
+                    if (clubs.isNotEmpty) {
+                      debugPrint('First club keys: ${clubs.first.keys}');
+                      debugPrint('First club data: ${clubs.first}');
+                    }
+
+                    final topPick = clubs
+                        .where((c) =>
+                            (c['category'] ?? '') == 'TOP_PICK')
+                        .toList();
+                    final mostPopular = clubs
+                        .where((c) =>
+                            (c['category'] ?? '') ==
+                            'MOST_POPULAR')
+                        .toList();
+                    final bestOffers = clubs
+                        .where((c) =>
+                            (c['category'] ?? '') == 'BEST_OFFERS')
+                        .toList();
+
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.only(bottom: 28),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 24),
+                          Image.asset('assets/images/LOGO.png', height: 50),
+                          const SizedBox(height: 26),
+                          _searchBar(),
+                          const SizedBox(height: 32),
+                          _sectionTitle('TOP PICK'),
+                          const SizedBox(height: 18),
+                          _grid(context, isLoggedIn, topPick),
+                          const SizedBox(height: 40),
+                          _sectionTitle('MOST POPULAR'),
+                          const SizedBox(height: 18),
+                          _grid(context, isLoggedIn, mostPopular),
+                          if (isLoggedIn) ...[
+                            const SizedBox(height: 40),
+                            _sectionTitle('BEST OFFERS'),
+                            const SizedBox(height: 18),
+                            _grid(context, isLoggedIn, bestOffers),
+                          ],
+                          const SizedBox(height: 60),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
               _glassBottomNav(context),
@@ -115,110 +167,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _topPick(BuildContext context, bool isLoggedIn) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: GestureDetector(
-        onTap: () => _handleClubTap(context, isLoggedIn),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: Stack(
-            children: [
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Image.asset(
-                  'assets/images/PUPIN_BAR.png',
-                  fit: BoxFit.cover,
-                ),
-              ),
-              if (isLoggedIn)
-                Positioned(
-                  bottom: 16,
-                  left: 16,
-                  child: _offerTag('JACK DANIELS + COLA x2 = 50€'),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _popularGrid(BuildContext context, bool isLoggedIn) {
-    return _grid(context, isLoggedIn, [
-      _card(
-        context: context,
-        image: 'assets/images/BAJA_MALI.png',
-        title: 'SPLAV DVA GALEBA',
-        subtitle: 'Baja Mali Knindza',
-        offer: 'GIN & TONIC x2 = 70€',
-        isLoggedIn: isLoggedIn,
-      ),
-      _card(
-        context: context,
-        image: 'assets/images/ALEKSANDRA.png',
-        title: 'SPLAV CRISTAL',
-        subtitle: 'Aleksandra Prijovic',
-        offer: 'VODKA + ENERGY = 80€',
-        isLoggedIn: isLoggedIn,
-      ),
-      _card(
-        context: context,
-        image: 'assets/images/PERLA.png',
-        title: 'SPLAV PERLA',
-        subtitle: 'El Fuego bend',
-        offer: 'WHISKEY SOUR = 40€',
-        isLoggedIn: isLoggedIn,
-      ),
-      _card(
-        context: context,
-        image: 'assets/images/SHOWROOM.png',
-        title: 'SHOWROOM',
-        subtitle: 'Boban Rajovic',
-        offer: 'MOJITO NIGHT = 10€',
-        isLoggedIn: isLoggedIn,
-      ),
-    ]);
-  }
-
-  Widget _bestOffersGrid(BuildContext context, bool isLoggedIn) {
-    return _grid(context, isLoggedIn, [
-      _card(
-        context: context,
-        image: 'assets/images/WERIGE.png',
-        title: 'WERIGE',
-        subtitle: 'Biba',
-        offer: 'WHISKEY + 4 COLA = 40€',
-        isLoggedIn: isLoggedIn,
-      ),
-      _card(
-        context: context,
-        image: 'assets/images/PARADISO.png',
-        title: 'PARADISO',
-        subtitle: 'Nucci',
-        offer: 'VODKA + 4 JUICE = 70€',
-        isLoggedIn: isLoggedIn,
-      ),
-      _card(
-        context: context,
-        image: 'assets/images/DISKONT.png',
-        title: 'DISKONT BAR',
-        subtitle: 'DJ Party',
-        offer: 'VODKA + 4 JUICE = 60€',
-        isLoggedIn: isLoggedIn,
-      ),
-      _card(
-        context: context,
-        image: 'assets/images/KALEM.png',
-        title: 'KALEM',
-        subtitle: 'Live band',
-        offer: 'APEROL = 20€',
-        isLoggedIn: isLoggedIn,
-      ),
-    ]);
-  }
-
-  Widget _grid(BuildContext context, bool isLoggedIn, List<Widget> items) {
+  Widget _grid(
+    BuildContext context,
+    bool isLoggedIn,
+    List<Map<String, dynamic>> clubs,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: GridView.count(
@@ -228,21 +181,34 @@ class HomeScreen extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         childAspectRatio: 0.72,
-        children: items,
+        children: clubs.map((club) {
+          return _card(
+            context: context,
+            clubId: club['id'] ?? '',
+            image: club['homeImage'] ?? '',
+            title: club['name'] ?? '',
+            subtitle: club['homeSubtitle'] ?? '',
+            offer: club['offer'] ?? '',
+            isLoggedIn: isLoggedIn,
+          );
+        }).toList(),
       ),
     );
   }
 
   Widget _card({
     required BuildContext context,
+    required String clubId,
     required String image,
     required String title,
     required String subtitle,
     required String offer,
     required bool isLoggedIn,
   }) {
+    final imagePath =
+        image.isNotEmpty ? image : 'assets/images/LOGO.png';
     return GestureDetector(
-      onTap: () => _handleClubTap(context, isLoggedIn),
+      onTap: () => _handleClubTap(context, isLoggedIn, clubId),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -252,7 +218,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 AspectRatio(
                   aspectRatio: 1,
-                  child: Image.asset(image, fit: BoxFit.cover),
+                  child: Image.asset(imagePath, fit: BoxFit.cover),
                 ),
                 if (isLoggedIn)
                   Positioned(bottom: 8, left: 8, child: _offerTag(offer)),
@@ -355,9 +321,17 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _handleClubTap(BuildContext context, bool isLoggedIn) {
+  void _handleClubTap(
+    BuildContext context,
+    bool isLoggedIn,
+    String clubId,
+  ) {
     if (isLoggedIn) {
-      Navigator.pushNamed(context, AppRoutes.clubDetails);
+      Navigator.pushNamed(
+        context,
+        AppRoutes.clubDetails,
+        arguments: clubId,
+      );
     } else {
       _showLoginRequiredDialog(context);
     }

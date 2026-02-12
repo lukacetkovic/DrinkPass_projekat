@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../navigation/app_routes.dart';
 
@@ -8,6 +9,19 @@ class ClubDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final clubId =
+        ModalRoute.of(context)?.settings.arguments as String?;
+    if (clubId == null || clubId.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Missing club id',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -23,44 +37,104 @@ class ClubDetailsScreen extends StatelessWidget {
             ],
           ),
         ),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _headerImage(context, isLoggedIn),
-                    const SizedBox(height: 16),
-                    SafeArea(
-                      top: false,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _clubInfo(context, isLoggedIn),
-                          const SizedBox(height: 24),
-                          _mapSection(),
-                        ],
-                      ),
-                    ),
-                  ],
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('clubs')
+              .doc(clubId)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return const Center(
+                child: Text(
+                  'Failed to load club',
+                  style: TextStyle(color: Colors.white70),
                 ),
-              ),
-            ),
-            _glassBottomNav(context),
-          ],
+              );
+            }
+
+            final data =
+                snapshot.data!.data() as Map<String, dynamic>? ?? {};
+
+            final name = data['name'] ?? '';
+            final description = data['description'] ?? '';
+            final detailsImage =
+                data['detailsImage'] ?? data['homeImage'] ?? '';
+            final offer = data['offer'] ?? '';
+            final ageLimit = data['ageLimit'] ?? '';
+            final type = data['type'] ?? '';
+            final category = data['category'] ?? '';
+            final time = data['time'] ?? '';
+            final date = data['date'] ?? '';
+            final phone = data['phone'] ?? '';
+            final rating = (data['rating'] ?? 0).toInt();
+            final lat = data['lat'];
+            final lng = data['lng'];
+
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _headerImage(
+                          context,
+                          isLoggedIn,
+                          detailsImage,
+                          offer,
+                        ),
+                        const SizedBox(height: 16),
+                        SafeArea(
+                          top: false,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _clubInfo(
+                                context,
+                                isLoggedIn,
+                                name,
+                                description,
+                                rating,
+                                ageLimit,
+                                type,
+                                category,
+                                time,
+                                date,
+                                phone,
+                              ),
+                              const SizedBox(height: 24),
+                              _mapSection(lat: lat, lng: lng),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                _glassBottomNav(context),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-Widget _headerImage(BuildContext context, bool isLoggedIn) {
+Widget _headerImage(
+  BuildContext context,
+  bool isLoggedIn,
+  String imagePath,
+  String offer,
+) {
   return Stack(
     children: [
       Image.asset(
-        'assets/images/PUPIN2.png',
+        imagePath.isNotEmpty ? imagePath : 'assets/images/LOGO.png',
         height: 240,
         width: double.infinity,
         fit: BoxFit.cover,
@@ -101,9 +175,9 @@ Widget _headerImage(BuildContext context, bool isLoggedIn) {
                 ),
               ],
             ),
-            child: const Text(
-              'JACK DANIELS + COLA x2 = 50 EUR',
-              style: TextStyle(
+            child: Text(
+              offer,
+              style: const TextStyle(
                 color: Colors.white,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w700,
@@ -116,7 +190,19 @@ Widget _headerImage(BuildContext context, bool isLoggedIn) {
   );
 }
 
-Widget _clubInfo(BuildContext context, bool isLoggedIn) {
+Widget _clubInfo(
+  BuildContext context,
+  bool isLoggedIn,
+  String name,
+  String description,
+  int rating,
+  String ageLimit,
+  String type,
+  String category,
+  String time,
+  String date,
+  String phone,
+) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: Column(
@@ -125,14 +211,14 @@ Widget _clubInfo(BuildContext context, bool isLoggedIn) {
         if (isLoggedIn)
           Row(
             children: List.generate(
-              5,
+              rating == 0 ? 5 : rating.clamp(1, 5),
               (index) => const Icon(Icons.star, size: 16, color: Colors.amber),
             ),
           ),
         const SizedBox(height: 8),
-        const Text(
-          'PUPIN PUB',
-          style: TextStyle(
+        Text(
+          name,
+          style: const TextStyle(
             color: Colors.white,
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w800,
@@ -140,21 +226,20 @@ Widget _clubInfo(BuildContext context, bool isLoggedIn) {
           ),
         ),
         const SizedBox(height: 12),
-        _infoBubble(
-          'DJ club in the core center of Novi Sad, featuring \nthe best DJs in town. The hottest place in town!\nFeaturing the best DJs and drink promotions!',
-        ),
+        _infoBubble(description),
         const SizedBox(height: 25),
 
         Wrap(
           spacing: 5,
           runSpacing: 10,
           children: [
-            _tag('21+', Icons.cake),
-            _tag('DJ Club', Icons.music_note),
-            _tag('TOP PICK 🔥', Icons.local_fire_department, highlight: true),
-            _tag('21:00h - 01:00h', Icons.timeline),
-            _tag('15.02.2026.', Icons.event),
-            _tag('066 266 166', Icons.phone),
+            if (ageLimit.isNotEmpty) _tag(ageLimit, Icons.cake),
+            if (type.isNotEmpty) _tag(type, Icons.music_note),
+            if (category.isNotEmpty)
+              _tag('$category 🔥', Icons.local_fire_department, highlight: true),
+            if (time.isNotEmpty) _tag(time, Icons.timeline),
+            if (date.isNotEmpty) _tag(date, Icons.event),
+            if (phone.isNotEmpty) _tag(phone, Icons.phone),
           ],
         ),
         const SizedBox(height: 24),
@@ -272,16 +357,27 @@ Widget _tag(String text, IconData icon, {bool highlight = false}) {
   );
 }
 
-Widget _mapSection() {
+Widget _mapSection({dynamic lat, dynamic lng}) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 15),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(20),
-      child: Image.asset(
-        'assets/images/PUPIN_MAPA.png',
+      child: Container(
         height: 220,
         width: double.infinity,
-        fit: BoxFit.cover,
+        color: Colors.white.withOpacity(0.08),
+        child: Center(
+          child: Text(
+            lat != null && lng != null
+                ? 'Map: $lat, $lng'
+                : 'Map: location not set',
+            style: const TextStyle(
+              color: Colors.white70,
+              fontFamily: 'Poppins',
+              fontSize: 14,
+            ),
+          ),
+        ),
       ),
     ),
   );
