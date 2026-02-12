@@ -69,7 +69,7 @@ class _CreateNewAccScreenState extends State<CreateNewAccScreen> {
 
       if (!mounted) return;
 
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      Navigator.pushReplacementNamed(context, AppRoutes.authGate);
 
     } catch (e) {
       if (e is FirebaseAuthException) {

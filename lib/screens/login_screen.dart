@@ -63,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
             password: password,
           );
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      Navigator.pushReplacementNamed(context, AppRoutes.authGate);
     } catch (e) {
       if (e is FirebaseAuthException) {
         final code = e.code.toLowerCase();

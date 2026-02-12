@@ -13,6 +13,7 @@ import 'screens/login_screen.dart';
 import 'screens/createNewAcc_screen.dart';
 import 'screens/myProfile_screen.dart';
 import 'screens/auth_gate.dart';
+import 'screens/admin_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +45,7 @@ class DrinkPassApp extends StatelessWidget {
         AppRoutes.createAccount: (context) => CreateNewAccScreen(),
 
         AppRoutes.profile: (context) => const MyProfileScreen(),
+        AppRoutes.admin: (context) => const AdminScreen(),
       },
     );
   }
