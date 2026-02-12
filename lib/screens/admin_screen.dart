@@ -281,7 +281,7 @@ class AdminScreen extends StatelessWidget {
 
   Widget _usersList() {
   return StreamBuilder<QuerySnapshot>(
-    stream: FirebaseFirestore.instance.collection('users').limit(5).snapshots(),
+    stream: FirebaseFirestore.instance.collection('users').limit(10).snapshots(),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const Text(
@@ -344,7 +344,7 @@ Widget _clubsList(BuildContext context) {
       const SizedBox(height: 12),
       StreamBuilder<QuerySnapshot>(
         stream:
-            FirebaseFirestore.instance.collection('clubs').limit(5).snapshots(),
+            FirebaseFirestore.instance.collection('clubs').limit(10).snapshots(),
         builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const Text(
@@ -408,7 +408,7 @@ Widget _reservationsList() {
   return StreamBuilder<QuerySnapshot>(
     stream: FirebaseFirestore.instance
         .collection('reservations')
-        .limit(5)
+        .limit(10)
         .snapshots(),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
