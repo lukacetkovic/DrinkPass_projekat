@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../state/auth_state.dart';
 import '../navigation/app_routes.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class AdminScreen extends StatelessWidget {
   const AdminScreen({super.key});
@@ -88,21 +90,21 @@ class AdminScreen extends StatelessWidget {
                   title: 'Users',
                   subtitle: 'View all accounts and roles',
                   icon: Icons.people_alt_outlined,
-                  actionText: 'OPEN USERS',
+                  child: _usersList(),
                 ),
                 const SizedBox(height: 16),
                 _adminSection(
-                  title: 'Clubs',
-                  subtitle: 'Create, edit or delete clubs',
+                  title: 'Events',
+                  subtitle: 'Create, edit or delete events',
                   icon: Icons.local_bar_outlined,
-                  actionText: 'OPEN CLUBS',
+                  child: _clubsList(),
                 ),
                 const SizedBox(height: 16),
                 _adminSection(
                   title: 'Reservations',
-                  subtitle: 'See all reservations and cancel',
+                  subtitle: 'See and manage all reservations',
                   icon: Icons.event_available_outlined,
-                  actionText: 'OPEN RESERVATIONS',
+                  child: _reservationsList(),
                 ),
                 const SizedBox(height: 24),
                 Container(
@@ -141,91 +143,74 @@ class AdminScreen extends StatelessWidget {
   }
 
   Widget _adminSection({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required String actionText,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.35),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              gradient: primaryGradient,
-              borderRadius: BorderRadius.circular(14),
+  required String title,
+  required String subtitle,
+  required IconData icon,
+  required Widget child,
+}) {
+  return Container(
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(0.08),
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: Colors.white.withOpacity(0.12)),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.35),
+          blurRadius: 18,
+          offset: const Offset(0, 10),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                gradient: primaryGradient,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: Colors.white),
             ),
-            child: Icon(icon, color: Colors.white),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 12,
-                    color: Colors.white70,
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      color: Colors.white70,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              gradient: primaryGradient,
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFF4D6D).withOpacity(0.5),
-                  blurRadius: 14,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Text(
-              actionText,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: 0.6,
+                ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+        const SizedBox(height: 14),
+        child,
+      ],
+    ),
+  );
+}
+
 
   Widget _avatarCircle(String asset) {
     return Container(
@@ -293,4 +278,195 @@ class AdminScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _usersList() {
+  return StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance.collection('users').limit(5).snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Text(
+          'Loading users...',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+        );
+      }
+      if (snapshot.hasError) {
+        return const Text(
+          'Failed to load users',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+        );
+      }
+      final docs = snapshot.data?.docs ?? [];
+      if (docs.isEmpty) {
+        return const Text(
+          'No users yet',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+        );
+      }
+      return Column(
+        children: docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final name = (data['displayName'] ?? '').toString();
+          final email = (data['email'] ?? '').toString();
+          final role = (data['role'] ?? 'user').toString();
+          return _listItem(
+            title: name.isNotEmpty ? name : email,
+            subtitle: email.isNotEmpty ? email : doc.id,
+            trailing: role.toUpperCase(),
+          );
+        }).toList(),
+      );
+    },
+  );
+}
+
+Widget _clubsList() {
+  return StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance.collection('clubs').limit(5).snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Text(
+          'Loading clubs...',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+        );
+      }
+      if (snapshot.hasError) {
+        return const Text(
+          'Failed to load clubs',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+        );
+      }
+      final docs = snapshot.data?.docs ?? [];
+      if (docs.isEmpty) {
+        return const Text(
+          'No clubs yet',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+        );
+      }
+        return Column(
+          children: docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final name = (data['name'] ?? '').toString();
+            final category = (data['category'] ?? '').toString();
+            final performer = (data['homeSubtitle'] ?? '').toString();
+            final type = (data['type'] ?? '').toString();
+            final date = (data['date'] ?? '').toString();
+            final baseSubtitle = performer.isNotEmpty ? performer : type;
+            final subtitle = baseSubtitle.isNotEmpty
+                ? (date.isNotEmpty ? '$baseSubtitle • $date' : baseSubtitle)
+                : (date.isNotEmpty ? date : 'Club');
+            return _listItem(
+              title: name.isNotEmpty ? name : doc.id,
+              subtitle: subtitle,
+              trailing: category.isNotEmpty ? category : 'CATEGORY',
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+Widget _reservationsList() {
+  return StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance
+        .collection('reservations')
+        .limit(5)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Text(
+          'Loading reservations...',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+        );
+      }
+      if (snapshot.hasError) {
+        return const Text(
+          'Failed to load reservations',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+        );
+      }
+      final docs = snapshot.data?.docs ?? [];
+      if (docs.isEmpty) {
+        return const Text(
+          'No reservations yet',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+        );
+      }
+      return Column(
+        children: docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final clubName = (data['clubName'] ?? '').toString();
+          final performer =
+              (data['homeSubtitle'] ?? data['performer'] ?? '').toString();
+          final date = (data['date'] ?? '').toString();
+          final email = (data['userEmail'] ?? '').toString();
+          final subtitle = performer.isNotEmpty
+              ? (date.isNotEmpty ? '$performer - $date' : performer)
+              : (date.isNotEmpty ? date : 'Event');
+          return _listItem(
+            title: clubName.isNotEmpty ? clubName : 'Reservation',
+            subtitle: subtitle,
+            trailing: email.isNotEmpty ? email : 'USER',
+          );
+        }).toList(),
+      );
+    },
+  );
+}
+
+Widget _listItem({
+  required String title,
+  required String subtitle,
+  required String trailing,
+}) {
+  return Container(
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(0.06),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: Colors.white.withOpacity(0.1)),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontFamily: 'Poppins',
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          trailing,
+          style: const TextStyle(
+            color: Colors.white60,
+            fontFamily: 'Poppins',
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.6,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 }

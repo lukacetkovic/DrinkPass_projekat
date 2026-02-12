@@ -65,6 +65,7 @@ class ClubDetailsScreen extends StatelessWidget {
             final detailsImage =
                 data['detailsImage'] ?? data['homeImage'] ?? '';
             final offer = data['offer'] ?? '';
+            final performer = data['homeSubtitle'] ?? '';
             final ageLimit = data['ageLimit'] ?? '';
             final type = data['type'] ?? '';
             final category = data['category'] ?? '';
@@ -109,6 +110,7 @@ class ClubDetailsScreen extends StatelessWidget {
                                 date,
                                 phone,
                                 offer,
+                                performer,
                               ),
                               const SizedBox(height: 24),
                               _mapSection(lat: lat, lng: lng),
@@ -208,6 +210,7 @@ Widget _clubInfo(
   String date,
   String phone,
   String offer,
+  String performer,
 ) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -258,6 +261,8 @@ Widget _clubInfo(
             offer: offer,
             date: date,
             time: time,
+            performer: performer,
+            type: type,
           ),
           child: Container(
             width: double.infinity,
@@ -456,6 +461,8 @@ Future<bool> _createReservation(
   required String offer,
   required String date,
   required String time,
+  required String performer,
+  required String type,
 }) async {
   final user = context.read<AuthState>().user;
   if (user == null) {
@@ -478,11 +485,14 @@ Future<bool> _createReservation(
     return false;
   }
 
+  final performerToSave = performer.isNotEmpty ? performer : type;
   await FirebaseFirestore.instance.collection('reservations').add({
     'userId': user.uid,
+    'userEmail': user.email ?? '',
     'clubId': clubId,
     'clubName': clubName,
     'offer': offer,
+    'homeSubtitle': performerToSave,
     'date': date,
     'time': time,
     'status': 'CONFIRMED',
@@ -626,6 +636,8 @@ void _showConfirmReservationDialog(
   required String offer,
   required String date,
   required String time,
+  required String performer,
+  required String type,
 }) {
   showDialog(
     context: context,
@@ -780,6 +792,8 @@ void _showConfirmReservationDialog(
                             offer: offer,
                             date: date,
                             time: time,
+                            performer: performer,
+                            type: type,
                           );
                           if (created) {
                             _showSuccessDialog(context);
