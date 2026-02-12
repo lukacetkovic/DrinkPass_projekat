@@ -3,6 +3,9 @@
         android:label="drink_pass"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAQhoPh8uhZs6olX1RXCFIKnt-0Z9D6_ng"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

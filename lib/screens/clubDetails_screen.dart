@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import '../navigation/app_routes.dart';
 import '../state/auth_state.dart';
@@ -168,13 +169,13 @@ Widget _headerImage(
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF4D6D).withOpacity(0.6),
+                  color: const Color(0xFFFF4D6D).withValues(alpha: 0.6),
                   blurRadius: 10,
                   spreadRadius: 0,
                   offset: const Offset(0, 0),
                 ),
                 BoxShadow(
-                  color: const Color(0xFFB5179E).withOpacity(0.45),
+                  color: const Color(0xFFB5179E).withValues(alpha: 0.45),
                   blurRadius: 30,
                   spreadRadius: 0,
                   offset: const Offset(0, 0),
@@ -276,13 +277,13 @@ Widget _clubInfo(
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF4D6D).withOpacity(0.6),
+                  color: const Color(0xFFFF4D6D).withValues(alpha: 0.6),
                   blurRadius: 10,
                   spreadRadius: 0,
                   offset: const Offset(0, 0),
                 ),
                 BoxShadow(
-                  color: const Color(0xFFB5179E).withOpacity(0.45),
+                  color: const Color(0xFFB5179E).withValues(alpha: 0.45),
                   blurRadius: 30,
                   spreadRadius: 0,
                   offset: const Offset(0, 0),
@@ -312,7 +313,7 @@ Widget _infoBubble(String text) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.1),
+      color: Colors.white.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(18),
     ),
     child: Text(
@@ -337,18 +338,18 @@ Widget _tag(String text, IconData icon, {bool highlight = false}) {
               end: Alignment.centerRight,
             )
           : null,
-      color: highlight ? null : Colors.white.withOpacity(0.12),
+      color: highlight ? null : Colors.white.withValues(alpha: 0.12),
       borderRadius: BorderRadius.circular(16),
       boxShadow: highlight
           ? [
               BoxShadow(
-                color: const Color(0xFFFF4D6D).withOpacity(0.6),
+                color: const Color(0xFFFF4D6D).withValues(alpha: 0.6),
                 blurRadius: 20,
                 spreadRadius: 0,
                 offset: const Offset(0, 0),
               ),
               BoxShadow(
-                color: const Color(0xFFB5179E).withOpacity(0.45),
+                color: const Color(0xFFB5179E).withValues(alpha: 0.45),
                 blurRadius: 30,
                 spreadRadius: 0,
                 offset: const Offset(0, 0),
@@ -376,26 +377,45 @@ Widget _tag(String text, IconData icon, {bool highlight = false}) {
 }
 
 Widget _mapSection({dynamic lat, dynamic lng}) {
+  final latVal = lat is num ? lat.toDouble() : double.tryParse('$lat');
+  final lngVal = lng is num ? lng.toDouble() : double.tryParse('$lng');
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 15),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(20),
-      child: Container(
+      child: SizedBox(
         height: 220,
         width: double.infinity,
-        color: Colors.white.withOpacity(0.08),
-        child: Center(
-          child: Text(
-            lat != null && lng != null
-                ? 'Map: $lat, $lng'
-                : 'Map: location not set',
-            style: const TextStyle(
-              color: Colors.white70,
-              fontFamily: 'Poppins',
-              fontSize: 14,
-            ),
-          ),
-        ),
+        child: (latVal == null || lngVal == null)
+            ? Container(
+                color: Colors.white.withValues(alpha: 0.08),
+                child: const Center(
+                  child: Text(
+                    'Map: location not set',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              )
+            : GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(latVal, lngVal),
+                  zoom: 15.2,
+                ),
+                markers: {
+                  Marker(
+                    markerId: const MarkerId('club'),
+                    position: LatLng(latVal, lngVal),
+                  ),
+                },
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                mapToolbarEnabled: false,
+                liteModeEnabled: true,
+              ),
       ),
     ),
   );
@@ -412,7 +432,7 @@ Widget _glassBottomNav(BuildContext context) {
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: Colors.white24),
       ),
@@ -537,7 +557,7 @@ void _showReservationInfoDialog(
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withValues(alpha: 0.4),
                 blurRadius: 24,
                 offset: const Offset(0, 12),
               ),
@@ -556,7 +576,7 @@ void _showReservationInfoDialog(
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF4D6D).withOpacity(0.5),
+                      color: const Color(0xFFFF4D6D).withValues(alpha: 0.5),
                       blurRadius: 24,
                       offset: const Offset(0, 0),
                     ),
@@ -600,7 +620,7 @@ void _showReservationInfoDialog(
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFFF4D6D).withOpacity(0.5),
+                          color: const Color(0xFFFF4D6D).withValues(alpha: 0.5),
                           blurRadius: 24,
                           offset: const Offset(0, 0),
                         ),
@@ -641,7 +661,7 @@ void _showConfirmReservationDialog(
 }) {
   showDialog(
     context: context,
-    barrierColor: Colors.black.withOpacity(0.6),
+    barrierColor: Colors.black.withValues(alpha: 0.6),
     builder: (_) {
       return Dialog(
         backgroundColor: Colors.transparent,
@@ -662,7 +682,7 @@ void _showConfirmReservationDialog(
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withValues(alpha: 0.4),
                 blurRadius: 24,
                 offset: const Offset(0, 12),
               ),
@@ -689,7 +709,7 @@ void _showConfirmReservationDialog(
                   horizontal: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(
@@ -776,7 +796,7 @@ void _showConfirmReservationDialog(
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.pinkAccent.withOpacity(0.5),
+                            color: Colors.pinkAccent.withValues(alpha: 0.5),
                             blurRadius: 12,
                             offset: const Offset(0, 6),
                           ),
@@ -852,7 +872,7 @@ void _showSuccessDialog(BuildContext context) {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withValues(alpha: 0.4),
                 blurRadius: 24,
                 offset: const Offset(0, 12),
               ),
@@ -871,7 +891,7 @@ void _showSuccessDialog(BuildContext context) {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.greenAccent.withOpacity(0.5),
+                      color: Colors.greenAccent.withValues(alpha: 0.5),
                       blurRadius: 24,
                       offset: const Offset(0, 0),
                     ),
@@ -922,7 +942,7 @@ void _showSuccessDialog(BuildContext context) {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFFF4D6D).withOpacity(0.5),
+                          color: const Color(0xFFFF4D6D).withValues(alpha: 0.5),
                           blurRadius: 24,
                           offset: const Offset(0, 0),
                         ),
@@ -955,7 +975,7 @@ void _showSuccessDialog(BuildContext context) {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.25),
+                      color: Colors.white.withValues(alpha: 0.25),
                       width: 1.2,
                     ),
                   ),
